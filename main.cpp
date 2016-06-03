@@ -81,6 +81,14 @@ ParsedArguments parse(int argc, char *argv[])
 	return result;
 }
 
+void printCount(const WordCount &count, const std::string &fileName = std::string())
+{
+	std::cout << count.lineCount << "\t" << count.wordCount << "\t" << count.charCount;
+	if (!fileName.empty())
+		std::cout << "\t" << fileName;
+	std::cout << std::endl;
+}
+
 int main(int argc, char *argv[])
 {
 	try {
@@ -88,20 +96,20 @@ int main(int argc, char *argv[])
 
 		if (parsed.files.empty()) {
 			auto count = handleStream(std::cin);
-			std::cout << count.lineCount << "\t" << count.wordCount << "\t" << count.charCount << std::endl;
+			printCount(count);
 		} else if (parsed.files.size() == 1) {
 			const auto fileName = parsed.files.front();
 			auto count = handleFile(fileName);
-			std::cout << count.lineCount << "\t" << count.wordCount << "\t" << count.charCount << std::endl;
+			printCount(count, fileName);
 		} else {
 			WordCount totalCount;
 			for (auto fileName : parsed.files) {
 				const auto count = handleFile(fileName);
 				totalCount = totalCount + count;
 
-				std::cout << count.lineCount << "\t" << count.wordCount << "\t" << count.charCount << fileName << std::endl;
+				printCount(count, fileName);
 			}
-			std::cout << totalCount.lineCount << "\t" << totalCount.wordCount << "\t" << totalCount.charCount << "total" << std::endl;
+			printCount(totalCount, "total");
 		}
 
 	} catch (const std::exception &ex) {
