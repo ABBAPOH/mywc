@@ -62,6 +62,13 @@ WordCount handleStream(std::istream &input_stream)
 	return result;
 }
 
+WordCount handleFile(const std::string &fileName)
+{
+	std::ifstream file;
+	file.open(fileName);
+	return handleStream(file);
+}
+
 ParsedArguments parse(int argc, char *argv[])
 {
 	ParsedArguments result;
@@ -79,19 +86,23 @@ int main(int argc, char *argv[])
 	try {
 		auto parsed = parse(argc, argv);
 
-		WordCount totalCount;
-
 		if (parsed.files.empty()) {
-			totalCount = handleStream(std::cin);
+			auto count = handleStream(std::cin);
+			std::cout << count.lineCount << "\t" << count.wordCount << "\t" << count.charCount << std::endl;
+		} else if (parsed.files.size() == 1) {
+			const auto fileName = parsed.files.front();
+			auto count = handleFile(fileName);
+			std::cout << count.lineCount << "\t" << count.wordCount << "\t" << count.charCount << std::endl;
 		} else {
+			WordCount totalCount;
 			for (auto fileName : parsed.files) {
-				std::ifstream file;
-				file.open(fileName);
-				totalCount = totalCount + handleStream(file);
-			}
-		}
+				const auto count = handleFile(fileName);
+				totalCount = totalCount + count;
 
-		std::cout << totalCount.lineCount << "\t" << totalCount.wordCount << "\t" << totalCount.charCount << std::endl;
+				std::cout << count.lineCount << "\t" << count.wordCount << "\t" << count.charCount << fileName << std::endl;
+			}
+			std::cout << totalCount.lineCount << "\t" << totalCount.wordCount << "\t" << totalCount.charCount << "total" << std::endl;
+		}
 
 	} catch (const std::exception &ex) {
 		std::cerr << ex.what() << std::endl;
