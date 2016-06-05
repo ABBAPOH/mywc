@@ -81,6 +81,8 @@ WordCount handleFile(const std::string &fileName)
 {
 	std::ifstream file;
 	file.open(fileName);
+	if (file.fail())
+		throw std::runtime_error(fileName + ": open: No such file or directory");
 	return handleStream(file);
 }
 
