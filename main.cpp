@@ -151,11 +151,6 @@ std::string formattedString(const WordCount &count, int flags, const std::string
 	return joinStrings(result, "\t");
 }
 
-void printCount(const WordCount &count, int flags, const std::string &fileName = std::string())
-{
-	std::cout << formattedString(count, flags, fileName) << std::endl;
-}
-
 int main(int argc, char *argv[])
 {
 	try {
