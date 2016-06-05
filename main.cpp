@@ -117,28 +117,43 @@ ParsedArguments parseArguments(int argc, char *argv[])
 	return result;
 }
 
-void printCount(const WordCount &count, int flags, const std::string &fileName = std::string())
+std::string joinStrings(const std::vector<std::string> &strings, const std::string &separator = ", ")
 {
+	std::string result;
+	for (auto string : strings) {
+		result += string + separator;
+	}
+
+	if (!result.empty()) {
+		result.resize(result.size() - separator.size());
+	}
+	return result;
+}
+
+std::string formattedString(const WordCount &count, int flags, const std::string &fileName = std::string())
+{
+	std::vector<std::string> result;
+
 	using Flags = ParsedArguments::Flags;
 
 	if (flags & Flags::LineCount)
-		std::cout << count.lineCount;
+		result.push_back(std::to_string(count.lineCount));
 
-	if (flags & Flags::WordCount) {
-		if (flags & Flags::LineCount)
-			std::cout << "\t";
-		std::cout << count.wordCount;
-	}
+	if (flags & Flags::WordCount)
+		result.push_back(std::to_string(count.wordCount));
 
-	if (flags & Flags::CharCount) {
-		if (flags & Flags::LineCount || flags & Flags::CharCount)
-			std::cout << "\t";
-		std::cout << count.charCount;
-	}
+	if (flags & Flags::CharCount)
+		result.push_back(std::to_string(count.charCount));
 
 	if (!fileName.empty())
-		std::cout << "\t" << fileName;
-	std::cout << std::endl;
+		result.push_back(fileName);
+
+	return joinStrings(result, "\t");
+}
+
+void printCount(const WordCount &count, int flags, const std::string &fileName = std::string())
+{
+	std::cout << formattedString(count, flags, fileName) << std::endl;
 }
 
 int main(int argc, char *argv[])
@@ -154,20 +169,21 @@ int main(int argc, char *argv[])
 
 		if (parsed.files.empty()) {
 			auto count = handleStream(std::cin);
-			printCount(count, parsed.flags);
+			std::cout << formattedString(count, parsed.flags) << std::endl;
 		} else if (parsed.files.size() == 1) {
 			const auto fileName = parsed.files.front();
 			auto count = handleFile(fileName);
-			printCount(count, parsed.flags, fileName);
+			std::cout << formattedString(count, parsed.flags, fileName) << std::endl;
 		} else {
 			WordCount totalCount;
 			for (auto fileName : parsed.files) {
 				const auto count = handleFile(fileName);
 				totalCount = totalCount + count;
 
-				printCount(count, parsed.flags, fileName);
+				std::cout << formattedString(count, parsed.flags, fileName) << std::endl;
 			}
-			printCount(totalCount, parsed.flags, "total");
+
+			std::cout << formattedString(totalCount, parsed.flags, "total") << std::endl;
 		}
 
 	} catch (const std::exception &ex) {
