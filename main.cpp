@@ -62,9 +62,9 @@ WordCount handleStream(std::istream &input_stream, bool statefull = false)
                 if (oldState != state)
                     result.wordCount++;
             }
-            if (isspace(c))
+            else if (isspace(c))
                 state = State::Space;
-            if (c == '\n') {
+            else if (c == '\n') {
                 state = State::Space;
                 result.lineCount++;
             }
