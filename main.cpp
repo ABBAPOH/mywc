@@ -45,35 +45,61 @@ struct ParsedArguments
     int flags = NoFlags;
 };
 
-WordCount handleStream(std::istream &input_stream)
+WordCount handleStream(std::istream &input_stream, bool statefull = false)
 {
     WordCount result;
     char c = 0;
 
-    do {
-        while (input_stream.get(c)) {
-            if (isalpha(c)) {
-                result.wordCount++;
-                break;
-            }
+    if (statefull) {
 
-            result.charCount++;
-            if (c == '\n')
+        enum class State { Unknown, Word, Space };
+        State state = State::Unknown;
+
+        while (input_stream.get(c)) {
+            State oldState = state;
+            if (isalpha(c))
+                state = State::Word;
+            if (isspace(c))
+                state = State::Space;
+            if (c == '\n') {
+                state = State::Space;
                 result.lineCount++;
+            }
+            if (oldState != state) {
+                if (state == State::Word)
+                    result.wordCount++;
+            }
+            result.charCount++;
         }
 
-        while (input_stream) {
-            result.charCount++;
-            if (c == '\n')
-                result.lineCount++;
+    } else {
 
-            if (isspace(c) || c == '\n') {
-                break;
+        do {
+            while (input_stream.get(c)) {
+                if (isalpha(c)) {
+                    result.wordCount++;
+                    break;
+                }
+
+                result.charCount++;
+                if (c == '\n')
+                    result.lineCount++;
             }
-            input_stream.get(c);
-        };
 
-    } while (input_stream);
+            while (input_stream) {
+                result.charCount++;
+                if (c == '\n')
+                    result.lineCount++;
+
+                if (isspace(c) || c == '\n') {
+                    break;
+                }
+                input_stream.get(c);
+            };
+
+        } while (input_stream);
+
+    }
 
     return result;
 }
