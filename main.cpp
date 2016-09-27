@@ -57,17 +57,16 @@ WordCount handleStream(std::istream &input_stream, bool statefull = false)
 
         while (input_stream.get(c)) {
             State oldState = state;
-            if (isalpha(c))
+            if (isalpha(c)) {
                 state = State::Word;
+                if (oldState != state)
+                    result.wordCount++;
+            }
             if (isspace(c))
                 state = State::Space;
             if (c == '\n') {
                 state = State::Space;
                 result.lineCount++;
-            }
-            if (oldState != state) {
-                if (state == State::Word)
-                    result.wordCount++;
             }
             result.charCount++;
         }
